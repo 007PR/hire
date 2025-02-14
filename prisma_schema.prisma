@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Candidate {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  phone         String?
+  linkedInUrl   String?
+  resumeUrl     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  analysis      Analysis?
+  documents     Document[]
+}
+
+model Analysis {
+  id               String   @id @default(cuid())
+  candidateId      String   @unique
+  candidate        Candidate @relation(fields: [candidateId], references: [id])
+  strengths        String[]
+  weaknesses       String[]
+  skills           Json     // Array of Skill objects
+  experience       Json     // Array of WorkExperience objects
+  education        Json     // Array of Education objects
+  keyInsights      String[]
+  aiScore         Float
+  personalityTraits String[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [id])
+  type        String   // "RESUME" | "LINKEDIN" | "OTHER"
+  content     String   @db.Text
+  fileName    String?
+  fileUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
